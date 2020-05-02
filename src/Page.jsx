@@ -1,21 +1,41 @@
 import React from "react";
 import { useQuery } from "@apollo/react-hooks";
-import { gql } from "apollo-boost";
+import {gql} from "apollo-boost";
 
-const EXCHANGE_RATES = gql`
-  {
-    todos {
-      text
-      done
-      user {
-        name
-      }
-    }
-  }
-`;
+  // const client = new ApolloClient({
+  //   uri:'http://localhost:8080/query'
+  // });
+
+  const USERS = gql`
+        query users {
+          users {
+            id
+            name
+            age
+          }
+        }
+      `;
+   
+
+
+
+
+// const EXCHANGE_RATES = gql`
+//   {
+//     todos {
+//       text
+//       done
+//       user {
+//         name
+//       }
+//     }
+//   }
+// `;
+
+
 
 function Page() {
-  const { loading, error, data } = useQuery(EXCHANGE_RATES);
+  const { loading, error, data } = useQuery(USERS);
 
   console.log(error);
   console.log(data);
@@ -23,10 +43,10 @@ function Page() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
-  return data.todos.map(({ id, text, done, user }) => (
+  return data.users.map(({ id, name, age }) => (
     <div>
       <p>
-        {id}: {text} : {done} : {user.id} : {user.name}
+        {id}: {name} : {age}
       </p>
     </div>
   ));
