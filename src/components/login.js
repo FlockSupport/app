@@ -5,27 +5,20 @@ import { HttpLink } from 'apollo-link-http';
 import { gql } from "apollo-boost";
 import { ApolloClient } from 'apollo-client';
 
-// Instantiate required constructor fields
-const cache = new InMemoryCache();
-const link = new HttpLink({
+const httpLink = new HttpLink({
   uri: 'http://localhost:8080/query',
 });
 
-const client = new ApolloClient({
-  // Provide required constructor fields
-  cache: cache,
-  link: link,
 
-  // Provide some optional constructor fields
-  email: 'react-web-client',
-  version: '1.3',
-  queryDeduplication: false,
-  defaultOptions: {
-    watchQuery: {
-      fetchPolicy: 'cache-and-network',
-    },
-  },
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache(),
+  headers:{
+    "Access-Control-Allow-Origin":'*'
+  }
 });
+
+
 
 const GET_USER = gql`
 query users ($input : UidInput!){
@@ -48,7 +41,8 @@ export default class Login extends Component {
         loggedIn: false,
         email: "",
         password:"",
-        currentUser:{}
+        currentUser:{},
+        error: ""
     };
     this.firebaseSignInHandler = this.firebaseSignInHandler.bind(this);
     this.retrieveUserFromDatabase = this.retrieveUserFromDatabase.bind(this);
@@ -59,30 +53,32 @@ export default class Login extends Component {
       .signInWithEmailAndPassword(this.state.email, this.state.password)
       .then((result) =>  {
         console.log("onSuccess", result.user.uid);
-        this.setState({
-            loggedIn: true
-        });
+        
         this.retrieveUserFromDatabase(result.user.uid)
         
       })
       .catch((error) => {
-        //setError("Error signing in with password and email!");
-        console.error("Error signing in with password and email", error);
+        console.error("Firebase: Error signing in with password and email", error);
+        this.setState({
+          error: "Invalid user"
+        })
       });
   };
 
   retrieveUserFromDatabase = (uid) => {
-    console.log("look here!")
+    uid = "lala"
     client.query({
       variables: { input: { uid} },
       query: GET_USER
     })
-    .then(result => { this.setState({currentUser: result.data.singleUser})})
-    .catch(error => { console.log(error) });
-
+    .then(result => { this.setState({loggedIn: true, currentUser: result.data.singleUser})})
+    .catch(error => { 
+      console.log(error);
+      this.setState({
+        error: "Invalid user"
+      })
+     });
   }
-
-
   
 
   render() {
@@ -123,6 +119,9 @@ export default class Login extends Component {
         ) : (
           <p></p>
         )}
+        {this.state.error ? (<p>
+            Invalid login credentials
+          </p>) : (<p></p>)}
 
         </>
       );

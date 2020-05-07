@@ -22,7 +22,7 @@ export default function ViewUsers() {
   if (error) return <p>Error :</p>;
   
   var userlist = data.users.map(({ id, email, age, uid }) => (
-    <div>
+    <div key={id}>
       <p>
         ID: {id}, EMAIL: {email}, AGE: {age}, UID: {uid}
       </p>
